@@ -227,6 +227,7 @@ All of these pieces are in a single repository. The webchat stack handles:
    By the end of Part B, you should have modified at least:
 
    - `nanobot/config.json`
+   - `nanobot/pyproject.toml`
    - `nanobot/entrypoint.py`
    - `nanobot/workspace/skills/lms/SKILL.md`
    - `caddy/Caddyfile`
