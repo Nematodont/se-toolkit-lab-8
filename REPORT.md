@@ -110,50 +110,5 @@ The gateway starts inside Docker, connects to the LMS MCP server, and begins the
 
 ## Task 2B — Web client
 
-**WebSocket test** — direct WebSocket connection through Caddy:
+<img width="1853" height="483" alt="image" src="https://github.com/user-attachments/assets/d6bed4c8-7a3d-48e8-9992-250572895c52" />
 
-```
-$ echo '{"content":"What labs are available?"}' | websocat "ws://localhost:42002/ws/chat?access_key=my-secret-nanobot-key"
-
-{"type":"text","content":"Here are the available labs:\n\n1. **Lab 01** – Products, Architecture & Roles\n2. **Lab 02** — Run, Fix, and Deploy a Backend Service\n3. **Lab 03** — Backend API: Explore, Debug, Implement, Deploy\n4. **Lab 04** — Testing, Front-end, and AI Agents\n5. **Lab 05** – Data Pipeline and Analytics Dashboard\n6. **Lab 06** — Build Your Own Agent\n7. **Lab 07** — Build a Client with an AI Coding Agent\n8. **Lab 08** — lab-08\n\nLet me know if you'd like details on any specific lab...","format":"markdown"}
-```
-
-**Flutter web client** — accessible at `http://<vm-ip>:42002/flutter`, login with `NANOBOT_ACCESS_KEY`. The agent answers questions using real LMS tools.
-
-Nanobot startup logs showing webchat channel and both MCP servers:
-
-```
-✓ Channels enabled: webchat
-WebChat relay listening on 127.0.0.1:8766
-WebChat starting on 0.0.0.0:8765
-MCP server 'lms': connected, 9 tools registered
-MCP server 'webchat': connected, 1 tools registered
-Agent loop started
-```
-
-## Task 3A — Structured logging
-
-<!-- Paste happy-path and error-path log excerpts, VictoriaLogs query screenshot -->
-
-## Task 3B — Traces
-
-<!-- Screenshots: healthy trace span hierarchy, error trace -->
-
-## Task 3C — Observability MCP tools
-
-<!-- Paste agent responses to "any errors in the last hour?" under normal and failure conditions -->
-
-## Task 4A — Multi-step investigation
-
-<!-- Paste the agent's response to "What went wrong?" showing chained log + trace investigation -->
-
-## Task 4B — Proactive health check
-
-<!-- Screenshot or transcript of the proactive health report that appears in the Flutter chat -->
-
-## Task 4C — Bug fix and recovery
-
-<!-- 1. Root cause identified
-     2. Code fix (diff or description)
-     3. Post-fix response to "What went wrong?" showing the real underlying failure
-     4. Healthy follow-up report or transcript after recovery -->
