@@ -95,35 +95,20 @@ Which lab would you like to see the scores for? Or I can pull pass rates for all
 
 ## Task 2A — Deployed agent
 
-<!-- Paste a short nanobot startup log excerpt showing the gateway started inside Docker -->
+Nanobot deployed as a Docker Compose service via `nanobot gateway`. Startup log:
+
+```
+nanobot-1  | Using config: /app/nanobot/config.resolved.json
+nanobot-1  | 🐈 Starting nanobot gateway version 0.1.4.post5 on port 18790...
+nanobot-1  | Warning: No channels enabled
+nanobot-1  | ✓ Heartbeat: every 1800s
+nanobot-1  | MCP server 'lms': connected, 9 tools registered
+nanobot-1  | Agent loop started
+```
+
+The gateway starts inside Docker, connects to the LMS MCP server, and begins the agent loop. No channels are enabled yet — that comes in Part B.
 
 ## Task 2B — Web client
 
-<!-- Screenshot of a conversation with the agent in the Flutter web app -->
+<img width="1853" height="483" alt="image" src="https://github.com/user-attachments/assets/d6bed4c8-7a3d-48e8-9992-250572895c52" />
 
-## Task 3A — Structured logging
-
-<!-- Paste happy-path and error-path log excerpts, VictoriaLogs query screenshot -->
-
-## Task 3B — Traces
-
-<!-- Screenshots: healthy trace span hierarchy, error trace -->
-
-## Task 3C — Observability MCP tools
-
-<!-- Paste agent responses to "any errors in the last hour?" under normal and failure conditions -->
-
-## Task 4A — Multi-step investigation
-
-<!-- Paste the agent's response to "What went wrong?" showing chained log + trace investigation -->
-
-## Task 4B — Proactive health check
-
-<!-- Screenshot or transcript of the proactive health report that appears in the Flutter chat -->
-
-## Task 4C — Bug fix and recovery
-
-<!-- 1. Root cause identified
-     2. Code fix (diff or description)
-     3. Post-fix response to "What went wrong?" showing the real underlying failure
-     4. Healthy follow-up report or transcript after recovery -->
