@@ -110,5 +110,6 @@ The gateway starts inside Docker, connects to the LMS MCP server, and begins the
 
 ## Task 2B — Web client
 
-<img width="1853" height="483" alt="image" src="https://github.com/user-attachments/assets/d6bed4c8-7a3d-48e8-9992-250572895c52" />
+<img width="1865" height="708" alt="image" src="https://github.com/user-attachments/assets/2537c484-2bca-46a5-9a7c-ab53a88ffdf8" />
+
 
