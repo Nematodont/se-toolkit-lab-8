@@ -231,6 +231,8 @@ except Exception as exc:
 
 When `read_items()` threw **any** exception (including a PostgreSQL connection failure), the router caught it and raised a `404 Not Found`. This misreported a server-side infrastructure failure as if the resource simply didn't exist.
 
+<img width="974" height="458" alt="image" src="https://github.com/user-attachments/assets/c6103983-947f-4c8b-96d4-c0c2876e4ee0" />
+
 ### Fix
 
 Changed the exception handler to return a proper `500 Internal Server Error`:
@@ -276,4 +278,6 @@ After restarting PostgreSQL, the agent confirmed the system recovered:
 And when asked "What went wrong?" after recovery:
 
 > The LMS backend was temporarily unable to connect to its PostgreSQL database due to a **DNS resolution failure**. [...] The issue appears to have been resolved, as the system is now responding normally and the labs list is accessible again.
+<img width="974" height="351" alt="image" src="https://github.com/user-attachments/assets/5f8821bf-b17f-46d0-8be0-7bacd11c128b" />
+
 
