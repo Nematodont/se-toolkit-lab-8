@@ -31,6 +31,24 @@ When the user asks about errors or failures:
    - When they occurred
    - What the root cause appears to be (if clear from the data)
 
+## One-Shot Investigation Flow
+
+When the user asks **"What went wrong?"** or **"Check system health"**, follow this investigation flow in a single pass:
+
+1. **`obs_logs_error_count`** on a fresh recent window (e.g., `"10m"`) — confirm there are errors and identify the affected service.
+
+2. **`obs_logs_search`** scoped to the most likely failing service — extract the most recent error log entries. Look for `trace_id` fields in the results.
+
+3. **`obs_traces_get`** for the most relevant recent `trace_id` — fetch the full trace to see the span hierarchy and the exact failure point.
+
+4. **Summarize the findings** in one coherent paragraph that explicitly mentions:
+   - **Log evidence**: what the error logs show (event type, error message, affected endpoint)
+   - **Trace evidence**: what the trace reveals about the request path and failure point
+   - **Root cause**: the affected service and the failing operation
+   - **Any discrepancy**: if the HTTP response misreports the error (e.g., a database failure returned as 404 instead of 500), call that out
+
+Do NOT dump raw JSON from the tools. Synthesize the evidence into a clear, concise diagnosis.
+
 ## Query Tips
 
 - VictoriaLogs field names: `service.name`, `severity`, `event`, `trace_id`

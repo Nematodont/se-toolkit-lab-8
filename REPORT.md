@@ -160,3 +160,120 @@ The gateway starts inside Docker, connects to the LMS MCP server, and begins the
 
 > Yes, there are **5 errors** in the last 10 minutes for the Learning Management Service. All share the same root cause: `socket.gaierror: [Errno -2] Name or service not known`. Affected endpoints: `POST /pipeline/sync`, `GET /items/`.
 
+## Task 4A — Multi-step investigation
+
+**"What labs are available?"** (with PostgreSQL stopped):
+
+> The LMS backend appears to be having issues — it's returning 404 errors. Let me try triggering a sync pipeline to refresh the data.
+> Unfortunately, the LMS backend is currently unavailable. The system is returning 404 errors, and the sync pipeline timed out when I tried to refresh the data.
+>
+> This could be a temporary issue. Would you like me to:
+> 1. Try again in a moment
+> 2. Check the system logs for any errors that might explain what's going on
+
+**"What went wrong?"** — Agent's investigation response:
+
+> Here's what I found from the logs and traces:
+>
+> **Root cause: The LMS backend can't connect to its PostgreSQL database.**
+>
+> The specific error is:
+> ```
+> socket.gaierror: [Errno -2] Name or service not known
+> ```
+>
+> This means the hostname `postgres` (the database server at `postgres:5432`) can't be resolved via DNS. The LMS backend is trying to reach the database but the network name doesn't exist or isn't reachable.
+>
+> **Chain of failures:**
+> 1. **DNS resolution fails** — the `postgres` hostname can't be resolved
+> 2. **Database connections fail** — all queries to the `item` table error out
+> 3. **API returns 404** — the `/items/` endpoint can't fetch data, so it returns 404
+> 4. **Sync pipeline times out** — the ETL process also can't connect to the database, causing the sync to hang and eventually timeout
+>
+> **What needs to be fixed:**
+> - The PostgreSQL database container/service needs to be running and accessible at the hostname `postgres`
+> - This is likely a Docker Compose or Kubernetes networking issue — either the database service is down, or the network configuration between the LMS backend and the database is broken
+>
+> Would you like me to check anything else, or do you have access to restart the database service?
+
+The agent successfully chained observability tools: it found error logs showing `socket.gaierror`, extracted a `trace_id`, fetched the matching trace, and synthesized both log evidence and trace evidence into a coherent diagnosis. It also identified the key discrepancy — the backend misreports a database connection failure as `404 Items not found`.
+
+## Task 4B — Proactive health check
+
+Created a recurring health check via the agent's built-in `cron` tool (job ID: `c1e3eeda`, every 2 minutes). After triggering a fresh failure by asking "What labs are available?" with PostgreSQL stopped, the proactive health check posted this report into the same Flutter chat:
+
+> 🔴 **LMS Health Check — Error Detected**
+>
+> **Issue:** Database connection failure on Learning Management Service.
+> **Error:** `socket.gaierror: [Errno -2] Name or service not known` — the service cannot resolve the hostname `postgres` (PostgreSQL at port 5432).
+> **Impact:** A `GET /items/` request returned HTTP 404 due to the failed DB query.
+> **Likely cause:** DNS resolution issue in the container network — the `postgres` hostname is unreachable from the LMS service container.
+>
+> Recommendation: Check Docker networking / DNS configuration for the `postgres` service.
+
+The agent proactively detected the failure and posted the diagnosis without being asked — proving it can monitor the system continuously, not just respond to questions.
+
+## Task 4C — Bug fix and recovery
+
+### Root cause
+
+The planted bug was in `backend/src/lms_backend/routers/items.py` — the `get_items()` endpoint's exception handler:
+
+```python
+# BEFORE (buggy):
+except Exception as exc:
+    logger.warning("items_list_failed_as_not_found", ...)
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Items not found",
+    ) from exc
+```
+
+When `read_items()` threw **any** exception (including a PostgreSQL connection failure), the router caught it and raised a `404 Not Found`. This misreported a server-side infrastructure failure as if the resource simply didn't exist.
+
+### Fix
+
+Changed the exception handler to return a proper `500 Internal Server Error`:
+
+```python
+# AFTER (fixed):
+except Exception as exc:
+    logger.error("items_list_failed", ...)
+    raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="Failed to retrieve items",
+    ) from exc
+```
+
+Also changed the log level from `warning` to `error` and simplified the event name.
+
+### Post-fix failure check
+
+After redeploying with PostgreSQL stopped, the agent's investigation response confirmed the status code changed from `404` to `500`:
+
+> The error has changed from 404 to **500 Internal Server Error**, which suggests the backend might be partially recovering. [...] The LMS backend still can't resolve the `postgres` hostname to connect to the database. The error code changed from 404 → 500, but the underlying issue is identical: **the database service is unreachable**.
+
+The `500` status now correctly signals a server-side failure rather than misleading clients with a `404`.
+
+### Healthy follow-up
+
+After restarting PostgreSQL, the agent confirmed the system recovered:
+
+> The LMS is back online! Here are the available labs:
+> | # | Lab Title |
+> |---|-----------|
+> | 1 | Lab 01 – Products, Architecture & Roles |
+> | 2 | Lab 02 — Run, Fix, and Deploy a Backend Service |
+> | 3 | Lab 03 — Backend API: Explore, Debug, Implement, Deploy |
+> | 4 | Lab 04 — Testing, Front-end, and AI Agents |
+> | 5 | Lab 05 – Data Pipeline and Analytics Dashboard |
+> | 6 | Lab 06 — Build Your Own Agent |
+> | 7 | Lab 07 — Build a Client with an AI Coding Agent |
+> | 8 | lab-08 |
+>
+> Looks like the database connectivity issue has been resolved.
+
+And when asked "What went wrong?" after recovery:
+
+> The LMS backend was temporarily unable to connect to its PostgreSQL database due to a **DNS resolution failure**. [...] The issue appears to have been resolved, as the system is now responding normally and the labs list is accessible again.
+
