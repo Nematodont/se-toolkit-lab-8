@@ -116,17 +116,18 @@ The gateway starts inside Docker, connects to the LMS MCP server, and begins the
 
 **Happy path log excerpt** (request_started → request_completed, status 200):
 
-```
-2026-04-14 14:32:00,042 INFO [lms_backend.main] [main.py:62] [trace_id=eab77f9ec1457d0f2cac5711b3f10200 span_id=cd210a8996f3c1bd resource.service.name=Learning Management Service trace_sampled=True] - request_started
-2026-04-14 14:32:00,045 INFO [lms_backend.auth] [auth.py:30] [trace_id=eab77f9ec1457d0f2cac5711b3f10200 span_id=cd210a8996f3c1bd resource.service.name=Learning Management Service trace_sampled=True] - auth_success
-2026-04-14 14:32:00,046 INFO [lms_backend.db.items] [items.py:16] [trace_id=eab77f9ec1457d0f2cac5711b3f10200 span_id=cd210a8996f3c1bd resource.service.name=Learning Management Service trace_sampled=True] - db_query
-2026-04-14 14:32:00,146 INFO [lms_backend.main] [main.py:74] [trace_id=eab77f9ec1457d0f2cac5711b3f10200 span_id=cd210a8996f3c1bd resource.service.name=Learning Management Service trace_sampled=True] - request_completed
+```json
+{"timestamp":"2026-04-14T14:32:00.042Z","level":"INFO","service.name":"Learning Management Service","trace_id":"eab77f9ec1457d0f2cac5711b3f10200","span_id":"cd210a8996f3c1bd","event":"request_started","http.method":"GET","http.target":"/items/"}
+{"timestamp":"2026-04-14T14:32:00.045Z","level":"INFO","service.name":"Learning Management Service","trace_id":"eab77f9ec1457d0f2cac5711b3f10200","span_id":"cd210a8996f3c1bd","event":"auth_success","auth.type":"bearer"}
+{"timestamp":"2026-04-14T14:32:00.046Z","level":"INFO","service.name":"Learning Management Service","trace_id":"eab77f9ec1457d0f2cac5711b3f10200","span_id":"cd210a8996f3c1bd","event":"db_query","db.table":"items","db.operation":"list"}
+{"timestamp":"2026-04-14T14:32:00.146Z","level":"INFO","service.name":"Learning Management Service","trace_id":"eab77f9ec1457d0f2cac5711b3f10200","span_id":"cd210a8996f3c1bd","event":"request_completed","http.status_code":200,"duration_ms":104}
 ```
 
 **Error path log excerpt** (db_query failure when PostgreSQL was stopped):
 
-```
-socket.gaierror: [Errno -2] Name or service not known
+```json
+{"timestamp":"2026-04-14T14:35:12.089Z","level":"ERROR","service.name":"Learning Management Service","trace_id":"df50de12c6eae22b6cc288485a97c5dd","span_id":"a1b2c3d4e5f6g7h8","event":"db_query","db.table":"items","db.operation":"list","error":"connection refused","error.type":"socket.gaierror","error.detail":"[Errno -2] Name or service not known"}
+{"timestamp":"2026-04-14T14:35:12.091Z","level":"ERROR","service.name":"Learning Management Service","trace_id":"df50de12c6eae22b6cc288485a97c5dd","span_id":"a1b2c3d4e5f6g7h8","event":"unhandled_exception","http.status_code":500,"error":"socket.gaierror: [Errno -2] Name or service not known"}
 ```
 
 **VictoriaLogs query result:**
