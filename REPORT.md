@@ -112,3 +112,47 @@ The gateway starts inside Docker, connects to the LMS MCP server, and begins the
 
 <img width="1853" height="483" alt="image" src="https://github.com/user-attachments/assets/d6bed4c8-7a3d-48e8-9992-250572895c52" />
 
+## Task 3A — Structured logging
+
+**Happy path log excerpt** (request_started → request_completed, status 200):
+
+```
+2026-04-14 14:32:00,042 INFO [lms_backend.main] [main.py:62] [trace_id=eab77f9ec1457d0f2cac5711b3f10200 span_id=cd210a8996f3c1bd resource.service.name=Learning Management Service trace_sampled=True] - request_started
+2026-04-14 14:32:00,045 INFO [lms_backend.auth] [auth.py:30] [trace_id=eab77f9ec1457d0f2cac5711b3f10200 span_id=cd210a8996f3c1bd resource.service.name=Learning Management Service trace_sampled=True] - auth_success
+2026-04-14 14:32:00,046 INFO [lms_backend.db.items] [items.py:16] [trace_id=eab77f9ec1457d0f2cac5711b3f10200 span_id=cd210a8996f3c1bd resource.service.name=Learning Management Service trace_sampled=True] - db_query
+2026-04-14 14:32:00,146 INFO [lms_backend.main] [main.py:74] [trace_id=eab77f9ec1457d0f2cac5711b3f10200 span_id=cd210a8996f3c1bd resource.service.name=Learning Management Service trace_sampled=True] - request_completed
+```
+
+**Error path log excerpt** (db_query failure when PostgreSQL was stopped):
+
+```
+socket.gaierror: [Errno -2] Name or service not known
+```
+
+**VictoriaLogs query result:**
+
+![VictoriaLogs errors](docs/task3a-victorialogs-errors.png)
+
+## Task 3B — Traces
+
+**Healthy trace** (trace ID: `a85484a9c4741c5ec6e86976ec4fa976`, 8 spans):
+
+![Healthy trace](docs/task3b-healthy-trace.png)
+
+**Error trace** (trace ID: `df50de12c6eae22b6cc288485a97c5dd`, 6 spans, exception: `socket.gaierror`):
+
+![Error trace](docs/task3b-error-trace.png)
+
+## Task 3C — Observability MCP tools
+
+**Normal conditions** ("Any LMS backend errors in the last 10 minutes?"):
+
+> Yes, there are **2 errors** in the LMS backend over the last 10 minutes. Both are related to **database connectivity**:
+> 1. `db_query` error on the `item` table
+> 2. `unhandled_exception` on `/pipeline/sync`
+> Root cause: `socket.gaierror: [Errno -2] Name or service not known`
+
+**Failure conditions** (PostgreSQL stopped, 5 errors found):
+
+> Yes, there are **5 errors** in the last 10 minutes for the Learning Management Service. All share the same root cause: `socket.gaierror: [Errno -2] Name or service not known`. Affected endpoints: `POST /pipeline/sync`, `GET /items/`.
+
