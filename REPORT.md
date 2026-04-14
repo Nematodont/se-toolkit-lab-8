@@ -131,17 +131,19 @@ socket.gaierror: [Errno -2] Name or service not known
 
 **VictoriaLogs query result:**
 
-![VictoriaLogs errors](docs/task3a-victorialogs-errors.png)
+<img width="1280" height="686" alt="image" src="https://github.com/user-attachments/assets/26ccc214-53fd-41c2-b336-bd7dbd4e3656" />
+
 
 ## Task 3B — Traces
 
 **Healthy trace** (trace ID: `a85484a9c4741c5ec6e86976ec4fa976`, 8 spans):
 
-![Healthy trace](docs/task3b-healthy-trace.png)
+<img width="1280" height="699" alt="image" src="https://github.com/user-attachments/assets/b9525af5-5700-412e-b5b0-35f845c9c897" />
+
 
 **Error trace** (trace ID: `df50de12c6eae22b6cc288485a97c5dd`, 6 spans, exception: `socket.gaierror`):
 
-![Error trace](docs/task3b-error-trace.png)
+<img width="1280" height="668" alt="image" src="https://github.com/user-attachments/assets/be28e7f8-a23e-41b4-a791-0d0e2b9f42d1" />
 
 ## Task 3C — Observability MCP tools
 
